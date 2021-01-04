@@ -55,7 +55,6 @@ function filter_content( $content ) {
 			'strong' => true,
 			'b'      => true,
 			'em'     => true,
-			'br'     => true,
 		)
 	);
 }
@@ -236,11 +235,11 @@ function render_block( $dialogue_attrs, $block_content, $block ) {
 			'</div>' .
 			( $attrs['show_timestamp']
 				? '<div class="' . $css_classname . '__timestamp">' .
-					$attrs['timestamp'] .
+					'<a href="#" class="' . $css_classname . '__timestamp_link">' . $attrs['timestamp'] . '</a>' .
 				'</div>'
 				: ''
 			) .
 		'</div>' .
-		'<p>' . $attrs['content'] . '</p>' .
+		'<div>' . $attrs['content'] . '</div>' .
 	'</div>';
 }
