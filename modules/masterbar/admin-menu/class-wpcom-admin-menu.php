@@ -262,13 +262,13 @@ class WPcom_Admin_Menu extends Admin_Menu {
 	/**
 	 * Adds Users menu.
 	 *
-	 * @param bool $calypso Optional. Whether links should point to Calypso or wp-admin. Default true (Calypso).
+	 * @param bool $wp_admin Optional. Whether links should point to Calypso or wp-admin. Default false (Calypso).
 	 */
-	public function add_users_menu( $calypso = true ) {
-		$users_slug   = $calypso ? 'https://wordpress.com/people/team/' . $this->domain : 'users.php';
+	public function add_users_menu( $wp_admin = false ) {
+		$users_slug   = $wp_admin ? 'users.php' : 'https://wordpress.com/people/team/' . $this->domain;
 		$add_new_slug = 'https://wordpress.com/people/new/' . $this->domain;
-		$profile_slug = $calypso ? 'https://wordpress.com/me' : 'grofiles-editor';
-		$account_slug = $calypso ? 'https://wordpress.com/me/account' : 'grofiles-user-settings';
+		$profile_slug = $wp_admin ? 'grofiles-editor' : 'https://wordpress.com/me';
+		$account_slug = $wp_admin ? 'grofiles-user-settings' : 'https://wordpress.com/me/account';
 
 		if ( current_user_can( 'list_users' ) ) {
 			remove_menu_page( 'users.php' );
@@ -284,7 +284,7 @@ class WPcom_Admin_Menu extends Admin_Menu {
 			add_submenu_page( $users_slug, esc_attr__( 'My Profile', 'jetpack' ), __( 'My Profile', 'jetpack' ), 'read', $profile_slug, null, 15 );
 			add_submenu_page( $users_slug, esc_attr__( 'Account Settings', 'jetpack' ), __( 'Account Settings', 'jetpack' ), 'read', $account_slug, null, 20 );
 			$this->migrate_submenus( 'users.php', $users_slug );
-		} elseif ( $calypso ) {
+		} elseif ( ! $wp_admin ) {
 			remove_menu_page( 'profile.php' );
 			remove_submenu_page( 'profile.php', 'grofiles-editor' );
 			remove_submenu_page( 'profile.php', 'grofiles-user-settings' );
@@ -298,25 +298,41 @@ class WPcom_Admin_Menu extends Admin_Menu {
 	/**
 	 * Adds Tools menu.
 	 *
-	 * @param bool $calypso Optional. Whether links should point to Calypso or wp-admin. Default true (Calypso).
+	 * @param bool $wp_admin Optional. Whether links should point to Calypso or wp-admin. Default false (Calypso).
 	 */
-	public function add_tools_menu( $calypso = true ) {
-		$menu_slug = $calypso ? 'https://wordpress.com/marketing/tools/' . $this->domain : 'tools.php';
+	public function add_tools_menu( $wp_admin = false ) {
+		$menu_slug = $wp_admin ? 'tools.php' : 'https://wordpress.com/marketing/tools/' . $this->domain;
 
 		add_submenu_page( $menu_slug, esc_attr__( 'Marketing', 'jetpack' ), __( 'Marketing', 'jetpack' ), 'manage_options', 'https://wordpress.com/marketing/tools/' . $this->domain, null, 5 );
 		add_submenu_page( $menu_slug, esc_attr__( 'Earn', 'jetpack' ), __( 'Earn', 'jetpack' ), 'manage_options', 'https://wordpress.com/earn/' . $this->domain, null, 10 );
 
-		parent::add_tools_menu( $calypso );
+		parent::add_tools_menu( $wp_admin );
 	}
 
 	/**
 	 * Adds Settings menu.
 	 *
-	 * @param bool $calypso Optional. Whether links should point to Calypso or wp-admin. Default true (Calypso).
+	 * @param bool $wp_admin Optional. Whether links should point to Calypso or wp-admin. Default false (Calypso).
 	 */
-	public function add_options_menu( $calypso = true ) {
+	public function add_options_menu( $wp_admin = false ) {
 		add_options_page( esc_attr__( 'Hosting Configuration', 'jetpack' ), __( 'Hosting Configuration', 'jetpack' ), 'manage_options', 'https://wordpress.com/hosting-config/' . $this->domain, null, 6 );
 
-		parent::add_options_menu( $calypso );
+		parent::add_options_menu( $wp_admin );
+	}
+
+	/**
+	 * Whether to use wp-admin pages rather than Calypso.
+	 *
+	 * @return bool
+	 */
+	public function should_link_to_wp_admin() {
+		$result = false; // Calypso.
+
+		$user_attribute = get_user_attribute( get_current_user_id(), 'calypso_preferences' );
+		if ( ! empty( $user_attribute['linkDestination'] ) ) {
+			$result = $user_attribute['linkDestination'];
+		}
+
+		return $result;
 	}
 }
