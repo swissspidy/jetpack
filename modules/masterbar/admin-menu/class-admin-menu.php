@@ -39,10 +39,13 @@ class Admin_Menu {
 	 */
 	protected function __construct() {
 		add_action( 'admin_menu', array( $this, 'reregister_menu_items' ), 99999 );
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'dequeue_scripts' ), 20 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_scripts' ), 20 );
-		add_action( 'rest_request_before_callbacks', array( $this, 'rest_api_init' ), 11 );
+
+		add_action( 'rest_request_before_callbacks', array( $this, 'set_api_request' ), 11 );
+		add_action( 'rest_api_init', array( $this, 'register_link_destination_meta' ) );
 
 		$this->domain = ( new Status() )->get_site_suffix();
 	}
@@ -65,8 +68,39 @@ class Admin_Menu {
 	/**
 	 * Sets up class properties for REST API requests.
 	 */
-	public function rest_api_init() {
+	public function set_api_request() {
 		$this->is_api_request = true;
+	}
+
+	/**
+	 * Makes jetpack_admin_menu_link_destination available in users REST API endpoint.
+	 */
+	public function register_link_destination_meta() {
+		register_meta(
+			'user',
+			'jetpack_admin_menu_link_destination',
+			array(
+				'auth_callback' => array( $this, 'update_admin_color_permissions_check' ),
+				'description'   => __( 'Whether to use wp-admin links for unified admin menu.', 'jetpack' ),
+				'single'        => true,
+				'show_in_rest'  => array(
+					'schema' => array( 'default' => false ),
+				),
+				'type'          => 'boolean',
+			)
+		);
+	}
+
+	/**
+	 * Permission callback to edit the `jetpack_admin_menu_link_destination` user meta.
+	 *
+	 * @param bool   $allowed   Whether the given user is allowed to edit this meta value.
+	 * @param string $meta_key  Meta key. In this case `jetpack_admin_menu_link_destination`.
+	 * @param int    $object_id Queried user ID.
+	 * @return bool
+	 */
+	public function update_admin_color_permissions_check( $allowed, $meta_key, $object_id ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter, VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		return current_user_can( 'edit_user', $object_id );
 	}
 
 	/**

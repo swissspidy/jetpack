@@ -1,4 +1,4 @@
-<?php
+<?php //phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited, WordPress.Files.FileName.InvalidClassFileName
 /**
  * Tests for Admin_Menu class.
  *
@@ -16,7 +16,7 @@ require_jetpack_file( 'tests/php/modules/masterbar/data/admin-menu.php' );
  *
  * @coversDefaultClass Automattic\Jetpack\Dashboard_Customizations\Admin_Menu
  */
-class Test_Admin_Menu extends WP_UnitTestCase {
+class Test_Admin_Menu extends WP_Test_Jetpack_REST_Testcase {
 
 	/**
 	 * Menu data fixture.
@@ -70,7 +70,6 @@ class Test_Admin_Menu extends WP_UnitTestCase {
 	 * Set up data.
 	 */
 	public function setUp() {
-		parent::setUp();
 		global $menu, $submenu;
 
 		// Initialize in setUp so it registers hooks for every test.
@@ -80,6 +79,10 @@ class Test_Admin_Menu extends WP_UnitTestCase {
 		$submenu = static::$submenu_data;
 
 		wp_set_current_user( static::$user_id );
+
+		add_action( 'rest_api_init', array( static::$admin_menu, 'register_link_destination_meta' ) );
+
+		parent::setUp();
 	}
 
 	/**
@@ -96,6 +99,83 @@ class Test_Admin_Menu extends WP_UnitTestCase {
 
 		$this->assertSame( 99999, has_action( 'admin_menu', array( $instance, 'reregister_menu_items' ) ) );
 		$this->assertSame( 10, has_action( 'admin_enqueue_scripts', array( $instance, 'enqueue_scripts' ) ) );
+	}
+
+	/**
+	 * Tests the schema response for OPTIONS requests.
+	 */
+	public function test_schema_request() {
+		static::$admin_menu->register_link_destination_meta();
+
+		$request  = wp_rest_request( Requests::OPTIONS, '/wp/v2/users/' . static::$user_id );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$schema = ( new WP_REST_Users_Controller() )->get_public_item_schema();
+
+		$this->assertEquals( $schema, $data['schema'] );
+		$this->assertArrayHasKey( 'meta', $data['schema']['properties'] );
+		$this->assertArrayHasKey( 'jetpack_admin_menu_link_destination', $data['schema']['properties']['meta']['properties'] );
+	}
+
+	/**
+	 * Tests retrieving the link destination setting for a user.
+	 *
+	 * @covers ::register_link_destination_meta
+	 */
+	public function test_get_color_scheme() {
+		wp_set_current_user( static::$user_id );
+		static::$admin_menu->register_link_destination_meta();
+
+		$request  = wp_rest_request( Requests::GET, '/wp/v2/users/' . static::$user_id );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertArrayHasKey( 'meta', $data );
+		$this->assertArrayHasKey( 'jetpack_admin_menu_link_destination', $data['meta'] );
+		$this->assertFalse( $data['meta']['jetpack_admin_menu_link_destination'] );
+	}
+
+	/**
+	 * Tests updating the link destination setting for a user.
+	 *
+	 * @covers ::register_link_destination_meta
+	 */
+	public function test_update_color_scheme() {
+		wp_set_current_user( static::$user_id );
+		static::$admin_menu->register_link_destination_meta();
+
+		// Editor can update their own meta value.
+		$request = wp_rest_request( Requests::PUT, '/wp/v2/users/' . static::$user_id );
+		$request->set_body_params(
+			array(
+				'meta' => array(
+					'jetpack_admin_menu_link_destination' => true,
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertArrayHasKey( 'meta', $data );
+		$this->assertArrayHasKey( 'jetpack_admin_menu_link_destination', $data['meta'] );
+		$this->assertTrue( $data['meta']['jetpack_admin_menu_link_destination'] );
+
+		// Editor can't update someone else's meta value.
+		$editor_id = $this->factory->user->create( array( 'role' => 'editor' ) );
+		wp_set_current_user( $editor_id );
+
+		$request = wp_rest_request( Requests::PUT, '/wp/v2/users/1' );
+		$request->set_body_params(
+			array(
+				'meta' => array(
+					'jetpack_admin_menu_link_destination' => true,
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertErrorResponse( 'rest_cannot_edit', $response, WP_Http::FORBIDDEN );
 	}
 
 	/**
