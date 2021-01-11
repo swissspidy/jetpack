@@ -20,7 +20,7 @@
 		"build-color-schemes-wpcom": "GULP_ENV=wpcom gulp sass:color-schemes",
 		"build-concurrently": "yarn install-if-deps-outdated && yarn clean && yarn concurrently 'yarn build-client' 'yarn build-php' 'yarn build-extensions' 'yarn build-search' 'yarn build-packages'",
 		"build-extensions": "webpack --config ./webpack.config.extensions.js",
-		"build-packages": "webpack --config ./webpack.config.packages.js",
+		"build-packages": "webpack --config ./webpack.config.packages.js && yarn --cwd ./packages/connection-ui build",
 		"build-php": "composer install --ignore-platform-reqs",
 		"build-production": "yarn distclean && yarn install --production=false && yarn build-production-client && yarn build-production-php && yarn build-production-extensions && yarn build-production-search && yarn build-production-packages",
 		"build-production-client": "NODE_ENV=production BABEL_ENV=production yarn build-client && yarn validate-es5 -- ./_inc/build/",

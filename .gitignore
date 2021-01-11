@@ -79,3 +79,8 @@ phpcs.xml
 /vendor/class-version-selector.php
 /vendor/jetpack-autoloader
 /vendor/nojimage
+
+# Package builds
+/packages/connection-ui/build
+/packages/connection-ui/node_modules
+/packages/connection-ui/.cache
