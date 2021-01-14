@@ -115,7 +115,7 @@ class JITM {
 
 		wp_enqueue_script(
 			'jetpack-jitm-new',
-			Assets::get_file_url_for_environment( '_inc/build/jetpack-jitm.min.js', '_inc/jetpack-jitm.js' ),
+			Assets::get_file_url_for_environment( 'assets/jetpack-jitm.min.js', 'assets/jetpack-jitm.js', __DIR__ ),
 			array( 'jquery' ),
 			self::PACKAGE_VERSION,
 			true
