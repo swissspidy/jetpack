@@ -117,8 +117,8 @@
 		"prettier": "npm:wp-prettier@2.0.5"
 	},
 	"optionalDependencies": {
-		"react": "16.13.1",
-		"react-dom": "16.13.1"
+		"react": "16.14.0",
+		"react-dom": "16.14.0"
 	},
 	"engines": {
 		"node": "^12.18.0",
