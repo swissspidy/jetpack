@@ -723,6 +723,12 @@ class Jetpack {
 		add_filter( 'jetpack_just_in_time_msgs', '__return_true', 9 );
 
 		add_filter( 'jetpack_just_in_time_msg_cache', '__return_true', 9 );
+		add_filter(
+			'jetpack_jitm_stats_version',
+			function () {
+				return JETPACK__VERSION;
+			}
+		);
 
 		/*
 		 * If enabled, point edit post, page, and comment links to Calypso instead of WP-Admin.
