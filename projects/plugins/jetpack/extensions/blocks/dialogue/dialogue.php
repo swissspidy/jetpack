@@ -253,13 +253,9 @@ function render_block( $dialogue_attrs, $block_content, $block ) {
 						'data-timestamp="' . $timestamp_in_seconds . '"' .
 					'>&nbsp;</button>' .
 
-					'<a ' .
-						'href="#" ' .
-						'class="' . $css_classname . '__timestamp-link" ' .
-						'data-timestamp="' . $timestamp_in_seconds . '"' .
-					'>' .
+					'<span class="' . $css_classname . '__timestamp-link">' .
 						$attrs['timestamp'] .
-					'</a>' .
+					'</span>' .
 				'</div>'
 				: ''
 			) .
