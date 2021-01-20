@@ -1,0 +1,31 @@
+.wp-block-jetpack-dialogue__timestamp {
+	display: flex;
+	align-items: center;
+}
+
+.wp-block-jetpack-dialogue__timestamp-play-button {
+	border: 0;
+	background: transparent;
+	box-sizing: border-box;
+	width: 0;
+	height: 16px;
+
+	border-color: transparent transparent transparent #202020;
+	transition: 100ms all ease;
+	cursor: pointer;
+	outline: none;
+
+	// Play state.
+	border-style: solid;
+	border-width: 8px 0 8px 12px;
+
+	// Pause state.
+	&.is-paused {
+		border-style: double;
+		border-width: 0px 0 0px 12px;
+	}
+
+	&:hover {
+		border-color: transparent transparent transparent #404040;
+	}
+}

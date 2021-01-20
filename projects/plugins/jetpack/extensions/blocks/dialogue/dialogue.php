@@ -248,9 +248,14 @@ function render_block( $dialogue_attrs, $block_content, $block ) {
 			'</div>' .
 			( $attrs['show_timestamp']
 				? '<div class="' . $css_classname . '__timestamp">' .
+					'<button ' .
+						'class="' . $css_classname . '__timestamp-play-button" ' .
+						'data-timestamp="' . $timestamp_in_seconds . '"' .
+					'>&nbsp;</button>' .
+
 					'<a ' .
 						'href="#" ' .
-						'class="' . $css_classname . '__timestamp_link" ' .
+						'class="' . $css_classname . '__timestamp-link" ' .
 						'data-timestamp="' . $timestamp_in_seconds . '"' .
 					'>' .
 						$attrs['timestamp'] .
